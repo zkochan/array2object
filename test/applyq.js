@@ -1,35 +1,30 @@
 'use strict';
 
+var sinon = require('sinon');
 var applyq = require('../');
 var noop = function() {};
-var sinon = require('sinon');
 
 describe('applyq', function() {
-  it('executes the cached command array', function(done) {
+  it('executes the cached command array', function() {
+    var spy = sinon.spy();
     var api = {
-      bar: function(a, b) {
-        expect(arguments.length).to.equal(2);
-        expect(a).to.equal(1);
-        expect(b).to.equal(2);
-        done();
-      }
+      bar: spy
     };
     var _apiq = [];
     _apiq.push(['bar', 1, 2]);
     applyq(api, _apiq);
+    expect(spy.calledWithExactly(1,2)).to.be.true;
   });
 
-  it('executes command array after the object was created', function(done) {
+  it('executes command array after the object was created', function() {
+    var spy = sinon.spy();
     var api = {
-      bar: function(param) {
-        expect(arguments.length).to.equal(1);
-        expect(param).to.equal(5);
-        done();
-      }
+      bar: spy
     };
     var _apiq = [];
     applyq(api, _apiq);
     _apiq.push(['bar', 5]);
+    expect(spy.calledWithExactly(5,1)).to.be.true;
   });
 
   it('removes newly added item from queue after it was processed', function() {
@@ -53,7 +48,7 @@ describe('applyq', function() {
     expect(_apiq.length).to.equal(0);
   });
 
-  it('executes the queued commands in the correct order', function(done) {
+  it('executes the queued commands in the correct order', function() {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     var api = {
@@ -64,8 +59,7 @@ describe('applyq', function() {
     _apiq.push(['foo', 1]);
     _apiq.push(['bar', 2]);
     applyq(api, _apiq);
-    sinon.assert.callOrder(spy2, spy1);
-    done();
+    sinon.assert.callOrder(spy1, spy2);
   });
 
   describe('command arrays that are not matched are added to the queue', function() {
